@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.coverage
+*.trx
+
+## Secretos — nunca subir credenciales reales
+.env
+.env.local
+.env.*.local
+secrets.json
+src/AndyProAcademy.Api/appsettings.Development.json
+
+## Herramientas
+.idea/
+*.swp
+*~
+
+## OS
+.DS_Store
+Thumbs.db

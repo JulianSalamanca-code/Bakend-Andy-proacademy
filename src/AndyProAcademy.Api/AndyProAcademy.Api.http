@@ -1,0 +1,7 @@
+@andy_pro_api_base=http://localhost:5080
+
+### API viva
+GET {{andy_pro_api_base}}/api/health
+
+### Conexión a Supabase (requiere la contraseña en appsettings.Development.json)
+GET {{andy_pro_api_base}}/api/health/database

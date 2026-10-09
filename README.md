@@ -6,27 +6,6 @@ API de reservaciones y tienda para **Andy Cosmetología • Puebla Studio**.
 - **Backend:** ASP.NET Core 10 Minimal API
 - **Base de datos:** Supabase Postgres
 
-## Requisitos
-
-- .NET SDK 10 o superior
-- Un proyecto de Supabase con la contraseña de la base configurada
-
-## Configuración
-
-La conexión se lee de `src/AndyProAcademy.Api/appsettings.Development.json`, que **está en `.gitignore`** (nunca se sube la contraseña real).
-
-```json
-{
-  "Supabase": {
-    "DbHost": "aws-0-us-east-1.pooler.supabase.com",
-    "DbPort": "6543",
-    "DbName": "postgres",
-    "DbUser": "postgres.xxxxxxxxxxxxxx",
-    "DbPassword": "TU_CONTRASENA"
-  }
-}
-```
-
 ### Sobre el puerto 6543
 
 Supabase ofrece dos puntos de conexión:

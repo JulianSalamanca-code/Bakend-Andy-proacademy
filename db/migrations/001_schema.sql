@@ -29,7 +29,7 @@ comment on table public.profiles is
 -- Catálogo de servicios
 -- ---------------------------------------------------------------------
 create table if not exists public.services (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   slug text not null unique,
   name text not null,
   tagline text not null,
@@ -37,8 +37,8 @@ create table if not exists public.services (
   badge text,
   duration_minutes integer not null check (duration_minutes > 0),
   price numeric(10, 2) not null check (price >= 0),
-  -- until en null significa que el dato necesita confirmación antes de usarse
-  -- en un CFDI. El prototipo no factura, pero el campo queda desde ahora.
+  -- Marca los servicios que exigen comprobante fiscal. El prototipo no
+  -- factura, pero el campo queda desde ahora para no migrar despues.
   rfc_required boolean not null default false,
   includes text[] not null default '{}',
   brands text[] not null default '{}',
@@ -58,7 +58,7 @@ create index if not exists services_published_idx
 -- supports_addons replica qué servicios admiten complementos, para no
 -- duplicar la regla en la base y en el frontend.
 create table if not exists public.addons (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   service_id integer not null references public.services (id) on delete cascade,
   name text not null,
   description text not null default '',
@@ -102,7 +102,7 @@ create index if not exists courses_published_idx on public.courses (is_published
 -- Un solo registro en el prototipo (Andy), pero la tabla existe desde ahora
 -- para que agregar más gente no requiera migración.
 create table if not exists public.specialists (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   name text not null,
   title text not null,
   bio text,
@@ -115,7 +115,7 @@ create table if not exists public.specialists (
 -- ---------------------------------------------------------------------
 -- weekday: 0 domingo … 6 sábado. El estudio abre lunes a sábado.
 create table if not exists public.working_hours (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   specialist_id integer not null references public.specialists (id) on delete cascade,
   weekday smallint not null check (weekday between 0 and 6),
   start_time time not null,
@@ -131,7 +131,7 @@ create table if not exists public.working_hours (
 -- ---------------------------------------------------------------------
 -- Vacaciones, feriados o cierres. Se guarda el motivo por auditoría.
 create table if not exists public.blocked_periods (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   specialist_id integer references public.specialists (id) on delete cascade,
   starts_at timestamptz not null,
   ends_at timestamptz not null,
@@ -256,7 +256,7 @@ create index if not exists products_category_idx
 
 -- Cada presentación (250 ml, 500 ml) es una fila con su propio stock.
 create table if not exists public.product_variants (
-  id serial primary key generated always as identity,
+  id integer primary key generated always as identity,
   product_id uuid not null references public.products (id) on delete cascade,
   size_label text not null,
   sku text unique,
@@ -336,7 +336,10 @@ create table if not exists public.reviews (
   body text not null,
   is_published boolean not null default true,
   sort_order integer not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Clave natural para que el seed sea idempotente: sin ella,
+  -- 'on conflict do nothing' no evita duplicados.
+  constraint reviews_author_unique unique (author_name)
 );
 
 create table if not exists public.faqs (
@@ -345,7 +348,9 @@ create table if not exists public.faqs (
   answer text not null,
   category text not null default 'General',
   sort_order integer not null default 0,
-  is_published boolean not null default true
+  is_published boolean not null default true,
+  -- Clave natural para que el seed sea idempotente.
+  constraint faqs_question_unique unique (question)
 );
 
 -- ---------------------------------------------------------------------

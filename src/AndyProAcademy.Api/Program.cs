@@ -1,5 +1,6 @@
 using AndyProAcademy.Api.Data;
 using AndyProAcademy.Api.Endpoints;
+using AndyProAcademy.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSingleton<DatabaseInspector>();
+builder.Services.AddSingleton<MigrationRunner>();
+builder.Services.AddSingleton<BookingSmokeTests>();
+
 var app = builder.Build();
 
 // ------------------------------------------------------------------
@@ -67,6 +72,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AngularDev");
 
 app.MapHealthEndpoints();
+app.MapDiagnosticsEndpoints();
+app.MapMigrationEndpoints();
 
 app.Run();
 

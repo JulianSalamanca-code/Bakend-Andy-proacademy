@@ -12,31 +12,33 @@
 
 -- ---------------------------------------------------------------------
 -- Especialista
+--
+-- No se fuerza el id: la columna es 'generated always as identity' y
+-- Postgres rechaza un valor explícito (428C9). Se inserta por nombre y se
+-- resuelve por WHERE para referenciarlo en las tablas siguientes.
 -- ---------------------------------------------------------------------
-insert into public.specialists (id, name, title, bio, is_active)
-values (
-  1,
+insert into public.specialists (name, title, bio, is_active)
+select
   'Andy',
   'Master Artist · Cosmetóloga & Estilista Titulada',
   'Especialista en alta cosmética y estilismo de gala. Certificación clínica y más de 320 servicios en Puebla.',
   true
-)
-on conflict (id) do update
-  set name = excluded.name,
-      title = excluded.title,
-      bio = excluded.bio;
+where not exists (select 1 from public.specialists where name = 'Andy');
 
 -- ---------------------------------------------------------------------
 -- Horario: lunes a sábado, 9:00 a 20:00
 -- ---------------------------------------------------------------------
 insert into public.working_hours (specialist_id, weekday, start_time, end_time)
-values
-  (1, 1, '09:00', '20:00'),  -- lunes
-  (1, 2, '09:00', '20:00'),  -- martes
-  (1, 3, '09:00', '20:00'),  -- miércoles
-  (1, 4, '09:00', '20:00'),  -- jueves
-  (1, 5, '09:00', '20:00'),  -- viernes
-  (1, 6, '09:00', '17:00')   -- sábado: cierra antes
+select s.id, v.weekday, v.start_time::time, v.end_time::time
+from (values
+  (1, '09:00', '20:00'),  -- lunes
+  (2, '09:00', '20:00'),  -- martes
+  (3, '09:00', '20:00'),  -- miércoles
+  (4, '09:00', '20:00'),  -- jueves
+  (5, '09:00', '20:00'),  -- viernes
+  (6, '09:00', '17:00')   -- sábado: cierra antes
+) as v(weekday, start_time, end_time)
+join public.specialists s on s.name = 'Andy'
 on conflict (specialist_id, weekday) do update
   set start_time = excluded.start_time,
       end_time = excluded.end_time,

@@ -111,18 +111,23 @@ comment on function public.get_available_slots(integer, date, integer, integer) 
 -- comprueba antes y devuelve un mensaje útil en lugar de un error 23P01
 -- crudo, que el frontend no puede mostrar tal cual.
 -- ---------------------------------------------------------------------
+-- Los parámetros obligatorios van primero y los opcionales después, todos
+-- con default. Postgres exige ese orden: si un parámetro tiene default, todos
+-- los siguientes deben tenerlo también (error 42P13).
 create or replace function public.create_booking(
+  -- Obligatorios
   p_specialist_id integer,
-  p_service_id     integer default null,
-  p_course_id      uuid    default null,
+  p_starts_at     timestamptz,
+  p_contact_name  text,
+  p_contact_phone text,
+  p_contact_email text,
+  -- Opcionales
+  p_service_id     integer   default null,
+  p_course_id      uuid      default null,
   p_addon_ids      integer[] default '{}',
-  p_starts_at      timestamptz,
-  p_contact_name   text,
-  p_contact_phone  text,
-  p_contact_email  text,
-  p_notes          text default null,
-  p_modality       text    default 'studio',
-  p_student_id     uuid    default null
+  p_notes          text      default null,
+  p_modality       text      default 'studio',
+  p_student_id     uuid      default null
 )
 returns public.bookings
 language plpgsql

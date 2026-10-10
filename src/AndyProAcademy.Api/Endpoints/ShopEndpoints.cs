@@ -125,13 +125,11 @@ public static class ShopEndpoints
         // Confirmación de pago
         // -----------------------------------------------------------------
 
-        /// <summary>
-        /// Confirma el pago de un pedido y descuenta el stock.
-        ///
-        /// La usa el frontend cuando la clienta vuelve del checkout. El
-        /// webhook sigue siendo la fuente principal: si cierra la pestaña
-        /// antes de regresar, esta llamada nunca llega.
-        /// </summary>
+        // Confirma el pago de un pedido y descuenta el stock.
+        //
+        // La usa el frontend cuando la clienta vuelve del checkout. El
+        // webhook sigue siendo la fuente principal: si cierra la pestaña
+        // antes de regresar, esta llamada nunca llega.
         group.MapPost("/orders/{id:guid}/confirm", async (
                 ShopRepository repo,
                 MercadoPagoClient mercadoPago,
@@ -174,16 +172,14 @@ public static class ShopEndpoints
             .WithName("ConfirmOrderPayment")
             .WithSummary("Confirma el pago tras volver del checkout");
 
-        /// <summary>
-        /// Webhook de Mercado Pago.
-        ///
-        /// Es la vía fiable: el frontend puede cerrarse antes de regresar y
-        /// aun así el pago debe confirmar el pedido y descontar el stock.
-        ///
-        /// Por eso devuelve 200 incluso sin hacer nada: Mercado Pago reintenta
-        /// el envío si recibe un error, y no sirve de nada que se pierda a
-        /// propósito. La conciliación periódica cubre los casos perdidos.
-        /// </summary>
+        // Webhook de Mercado Pago.
+        //
+        // Es la vía fiable: el frontend puede cerrarse antes de regresar y
+        // aun así el pago debe confirmar el pedido y descontar el stock.
+        //
+        // Por eso devuelve 200 incluso sin hacer nada: Mercado Pago reintenta
+        // el envío si recibe un error, y no sirve de nada que se pierda a
+        // propósito. La conciliación periódica cubre los casos perdidos.
         group.MapPost("/webhooks/mercadopago", async (
                 ShopRepository repo,
                 MercadoPagoWebhookDto notification,

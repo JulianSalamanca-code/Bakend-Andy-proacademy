@@ -25,6 +25,12 @@ builder.Services.AddSwaggerGen(options =>
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
         options.IncludeXmlComments(xmlPath);
+
+    // Minimal API no propaga el tipo de retorno al documento OpenAPI: los
+    // endpoints aparecen sin schema y el cliente TypeScript del frontend no
+    // tendría de dónde sacar las interfaces. Swashbuckle resuelve esto solo
+    // si cada endpoint declara su tipo con [ProducesResponseType], que es lo
+    // que hacen los endpoints de catálogo.
 });
 
 // Valida la configuración de Supabase al arrancar, en lugar de fallar en el
@@ -52,6 +58,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<DatabaseInspector>();
 builder.Services.AddSingleton<MigrationRunner>();
 builder.Services.AddSingleton<BookingSmokeTests>();
+builder.Services.AddSingleton<CatalogRepository>();
 
 var app = builder.Build();
 
@@ -74,6 +81,7 @@ app.UseCors("AngularDev");
 app.MapHealthEndpoints();
 app.MapDiagnosticsEndpoints();
 app.MapMigrationEndpoints();
+app.MapCatalogEndpoints();
 
 app.Run();
 

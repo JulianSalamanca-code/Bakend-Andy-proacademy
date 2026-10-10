@@ -1,5 +1,6 @@
 using AndyProAcademy.Api.Data;
 using AndyProAcademy.Api.Endpoints;
+using AndyProAcademy.Api.Middleware;
 using AndyProAcademy.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,6 +63,7 @@ builder.Services.AddSingleton<CatalogRepository>();
 builder.Services.AddSingleton<BookingRepository>();
 builder.Services.AddSingleton<AdminRepository>();
 builder.Services.AddSingleton<ShopRepository>();
+builder.Services.AddSingleton<SupabaseJwtValidator>();
 
 // Mercado Pago necesita su propio HttpClient con timeout holgado: una
 // llamada al proveedor puede tardar varios segundos y el default de 100s
@@ -91,6 +93,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AngularDev");
+
+// Identifica al usuario antes de los endpoints. No bloquea: solo deja el
+// resultado en el contexto, y el filtro de cada ruta decide si lo exige.
+app.UseMiddleware<SupabaseAuthMiddleware>();
 
 app.MapHealthEndpoints();
 app.MapDiagnosticsEndpoints();

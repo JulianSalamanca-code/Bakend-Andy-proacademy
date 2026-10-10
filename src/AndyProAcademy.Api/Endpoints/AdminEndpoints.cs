@@ -1,4 +1,5 @@
 using AndyProAcademy.Api.Data;
+using AndyProAcademy.Api.Middleware;
 using AndyProAcademy.Api.Models;
 using Npgsql;
 
@@ -7,27 +8,24 @@ namespace AndyProAcademy.Api.Endpoints;
 /// <summary>
 /// Endpoints del panel de administración.
 ///
-/// ADVERTENCIA — estos endpoints no tienen control de acceso propio. La
-/// protección depende de que la conexión a la base pase por el rol de
-/// servicio y de que las políticas RLS bloqueen el acceso sin JWT de
-/// admin. Hoy la API se conecta con el usuario postgres del pooler, que
-/// salta la RLS, así que este endpoint queda abierto a quien conozca la
-/// URL.
+/// Requieren un JWT de Supabase con rol admin en el perfil. La validación
+/// la hace SupabaseAuthorizationFilter, que corre en todas las rutas del
+/// grupo.
 ///
-/// Antes de publicar hay que resolverlo de una de estas dos formas:
-///   1. Middleware que valide el JWT de Supabase y su rol admin.
-///   2. Conectar con un rol de Postgres que solo tenga los permisos
-///      justos y esté sujeto a RLS.
-///
-/// La opción 1 es la recomendada: mantiene una sola conexión y reutiliza el
-/// Auth que ya existe para el login.
+/// Nota sobre por qué hace falta aunque exista RLS: la API se conecta con
+/// el usuario postgres del pooler, que salta las políticas. El filtro de
+/// aplicación es la capa que realmente protege estas rutas hoy.
 /// </summary>
 public static class AdminEndpoints
 {
     public static void MapAdminEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/admin")
-            .WithTags("Admin");
+            .WithTags("Admin")
+            // Un atributo en el grupo aplica a todas sus rutas. Decirlo en
+            // cada endpoint sería fácil de olvidar en uno nuevo.
+            .WithMetadata(new RequireAdminAttribute())
+            .AddEndpointFilter<SupabaseAuthorizationFilter>();
 
         // -----------------------------------------------------------------
         // Métricas y agenda

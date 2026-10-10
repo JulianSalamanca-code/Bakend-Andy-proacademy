@@ -340,6 +340,10 @@ public sealed class AdminRepository(NpgsqlConnectionStringBuilder connectionStri
         await using var connection = await OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
 
+        // Marca si la transacción ya terminó, para no revertir una
+        // transacción ya confirmada si algo falla después.
+        var transactionCompleted = false;
+
         try
         {
             // La variante se bloquea durante la operación: dos ajustes
@@ -386,12 +390,17 @@ public sealed class AdminRepository(NpgsqlConnectionStringBuilder connectionStri
 
             await movement.ExecuteNonQueryAsync(ct);
             await transaction.CommitAsync(ct);
+            transactionCompleted = true;
 
             return newStock;
         }
         catch
         {
-            await transaction.RollbackAsync(ct);
+            if (!transactionCompleted)
+            {
+                await transaction.RollbackAsync(ct);
+            }
+
             throw;
         }
     }
@@ -522,10 +531,8 @@ public sealed class AdminRepository(NpgsqlConnectionStringBuilder connectionStri
     private static IReadOnlyList<AdminVariantDto> ReadVariants(
         NpgsqlDataReader reader, int ordinal)
     {
-        if (reader.IsDBNull(ordinal)) return Array.Empty<AdminVariantDto>();
-
-        using var doc = System.Text.Json.JsonDocument.Parse(
-            reader.GetFieldValue<string>(ordinal));
+        using var doc = JsonbReader.Parse(reader, ordinal);
+        if (doc is null) return Array.Empty<AdminVariantDto>();
 
         var results = new List<AdminVariantDto>();
 

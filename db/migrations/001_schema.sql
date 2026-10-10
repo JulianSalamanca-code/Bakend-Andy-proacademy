@@ -305,6 +305,10 @@ create table if not exists public.orders (
   total numeric(10, 2) not null check (total >= 0),
   -- En el prototipo solo pick-up en el estudio; el envío llega en producción.
   fulfillment text not null default 'pickup' check (fulfillment in ('pickup', 'envio')),
+  -- Instrucciones de entrega o notas de la clienta. La escribe el endpoint
+  -- de creación de pedido, así que la columna tiene que existir desde la
+  -- primera migración.
+  notes text,
   payment_provider text,
   payment_reference text,
   paid_at timestamptz,

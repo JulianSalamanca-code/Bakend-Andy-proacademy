@@ -428,9 +428,9 @@ public sealed class CatalogRepository(NpgsqlConnectionStringBuilder connectionSt
 
     private static IReadOnlyList<AddOnDto> ReadAddOns(NpgsqlDataReader reader, int ordinal)
     {
-        if (reader.IsDBNull(ordinal)) return Array.Empty<AddOnDto>();
+        using var doc = JsonbReader.Parse(reader, ordinal);
+        if (doc is null) return Array.Empty<AddOnDto>();
 
-        using var doc = System.Text.Json.JsonDocument.Parse(reader.GetFieldValue<string>(ordinal));
         var results = new List<AddOnDto>();
 
         foreach (var item in doc.RootElement.EnumerateArray())
@@ -449,9 +449,9 @@ public sealed class CatalogRepository(NpgsqlConnectionStringBuilder connectionSt
 
     private static IReadOnlyList<ProductVariantDto> ReadVariants(NpgsqlDataReader reader, int ordinal)
     {
-        if (reader.IsDBNull(ordinal)) return Array.Empty<ProductVariantDto>();
+        using var doc = JsonbReader.Parse(reader, ordinal);
+        if (doc is null) return Array.Empty<ProductVariantDto>();
 
-        using var doc = System.Text.Json.JsonDocument.Parse(reader.GetFieldValue<string>(ordinal));
         var results = new List<ProductVariantDto>();
 
         foreach (var item in doc.RootElement.EnumerateArray())

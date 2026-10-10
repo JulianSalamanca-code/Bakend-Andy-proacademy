@@ -61,6 +61,18 @@ builder.Services.AddSingleton<BookingSmokeTests>();
 builder.Services.AddSingleton<CatalogRepository>();
 builder.Services.AddSingleton<BookingRepository>();
 builder.Services.AddSingleton<AdminRepository>();
+builder.Services.AddSingleton<ShopRepository>();
+
+// Mercado Pago necesita su propio HttpClient con timeout holgado: una
+// llamada al proveedor puede tardar varios segundos y el default de 100s
+// de HttpClient aplica, pero conviene dejarlo explicito.
+builder.Services.AddHttpClient<MercadoPagoClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    // BaseAddress vacío a propósito: cada método compone su URL completa
+    // porque sandbox y producción usan dominios distintos según el caso.
+    client.BaseAddress = new Uri("https://api.mercadopago.com");
+});
 
 var app = builder.Build();
 
@@ -86,6 +98,7 @@ app.MapMigrationEndpoints();
 app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
 app.MapAdminEndpoints();
+app.MapShopEndpoints();
 
 app.Run();
 

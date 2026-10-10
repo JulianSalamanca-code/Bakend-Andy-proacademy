@@ -60,6 +60,7 @@ builder.Services.AddSingleton<MigrationRunner>();
 builder.Services.AddSingleton<BookingSmokeTests>();
 builder.Services.AddSingleton<CatalogRepository>();
 builder.Services.AddSingleton<BookingRepository>();
+builder.Services.AddSingleton<AdminRepository>();
 
 var app = builder.Build();
 
@@ -84,6 +85,7 @@ app.MapDiagnosticsEndpoints();
 app.MapMigrationEndpoints();
 app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
+app.MapAdminEndpoints();
 
 app.Run();
 
